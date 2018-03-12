@@ -13,7 +13,8 @@ import time
 import os
 import copy
 import operator
-
+from class_name import class_names
+from mapping import name_mapping
 output_csv = open('result.csv','w')
 output_csv.write('id,category\n')
 
@@ -61,7 +62,7 @@ def test_model(model):
         _, preds = torch.max(outputs.data, 1)
 
         for j in range(inputs.size()[0]):
-            res[int(paths[j].split('_')[1].split('.')[0])]= preds[j]
+            res[int(paths[j].split('_')[1].split('.')[0])]= name_mapping[class_names[preds[j]]]
 
 
 test_model(trained_model)
@@ -70,3 +71,5 @@ sorted_res = sorted(res.items(), key=operator.itemgetter(0))
 
 for d in sorted_res:
     output_csv.write(str(d[0])+','+str(d[1])+'\n')
+
+output_csv.close()
