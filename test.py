@@ -13,7 +13,7 @@ output_csv.write('id,category\n')
 
 trained_model = models.resnet18(pretrained=True)
 num_ftrs = trained_model.fc.in_features
-trained_model.fc = nn.Linear(num_ftrs, 2)
+trained_model.fc = nn.Linear(num_ftrs, 18)
 trained_model.load_state_dict(torch.load('trained_nn'))
 
 data_transforms = {

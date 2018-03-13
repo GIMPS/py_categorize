@@ -201,7 +201,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 
 model_ft = models.resnet18(pretrained=True)
 num_ftrs = model_ft.fc.in_features
-model_ft.fc = nn.Linear(num_ftrs, 2)
+model_ft.fc = nn.Linear(num_ftrs, 18)
 
 if use_gpu:
     model_ft = model_ft.cuda()
@@ -223,7 +223,7 @@ exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 #
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=20000
+                       num_epochs=4000
                        )
 
 
