@@ -179,7 +179,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
                 torch.save(model.state_dict(), 'trained_nn')
-                logfile.write('Saved at '+time.ctime()+'\n')
+                logfile.write('\n'+'Saved at '+time.ctime()+'\n')
                 logfile.write('Best val Acc: {:4f}'.format(best_acc))
 
         print()

@@ -39,7 +39,7 @@ use_gpu = torch.cuda.is_available()
 res={}
 def test_model(model):
     model.eval()
-
+    model.train(False)
     for i, data in enumerate(dataloaders['test']):
         (inputs, labels), (paths,_)= data
         if use_gpu:
