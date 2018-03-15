@@ -88,7 +88,7 @@ data_dir = 'data'
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
                   for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=20,
                                              shuffle=True, num_workers=4)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -179,8 +179,9 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
                 torch.save(model.state_dict(), 'trained_nn')
-                logfile.write('\n'+'Saved at '+time.ctime()+'\n')
-                logfile.write('Best val Acc: {:4f}'.format(best_acc))
+                logfile.write('Saved at '+time.ctime()+'\n')
+                logfile.write('Best val Acc: {:4f}'.format(best_acc)+'\n')
+                logfile.write('Training Acc: {:4f}'.format(epoch_acc)+'\n')
 
         print()
 
@@ -201,7 +202,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 # Load a pretrained model and reset final fully connected layer.
 #
 
-model_ft = models.resnet18(pretrained=True)
+model_ft = models.resnet34(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 model_ft.fc = nn.Linear(num_ftrs, 18)
 if use_gpu:
@@ -210,12 +211,12 @@ if use_gpu:
 criterion = nn.CrossEntropyLoss()
 
 # Observe that all parameters are being optimized
-optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
+optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.01, momentum=0.9)
 
 # Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=16, gamma=0.1)
 
-model_ft.load_state_dict(torch.load('trained_nn'))
+#model_ft.load_state_dict(torch.load('trained_nn'))
 
 ######################################################################
 # Train and evaluate
@@ -226,5 +227,5 @@ model_ft.load_state_dict(torch.load('trained_nn'))
 #
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=10
+                       num_epochs=80
                        )

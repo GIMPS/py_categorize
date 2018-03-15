@@ -1,3 +1,0 @@
-Saved at Thu Mar 15 11:31:30 2018
-Best val Acc: 0.800000Saved at Thu Mar 15 11:31:39 2018
-Best val Acc: 0.950000
