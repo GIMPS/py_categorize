@@ -11,10 +11,6 @@ from mapping import name_mapping
 output_csv = open('result.csv','w')
 output_csv.write('id,category\n')
 
-trained_model = models.resnet18(pretrained=True)
-num_ftrs = trained_model.fc.in_features
-trained_model.fc = nn.Linear(num_ftrs, 18)
-trained_model.load_state_dict(torch.load('trained_nn'))
 
 data_transforms = {
     'test': transforms.Compose([
@@ -57,6 +53,13 @@ def test_model(model):
         for j in range(inputs.size()[0]):
             res[int(paths[j].split('_')[1].split('.')[0])]= name_mapping[class_names[preds[j]]]
 
+
+trained_model = models.resnet18(pretrained=True)
+num_ftrs = trained_model.fc.in_features
+trained_model.fc = nn.Linear(num_ftrs, 18)
+trained_model.load_state_dict(torch.load('trained_nn'))
+if use_gpu:
+    trained_model = trained_model.cuda()
 
 test_model(trained_model)
 

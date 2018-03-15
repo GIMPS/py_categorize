@@ -178,6 +178,9 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
+                torch.save(model.state_dict(), 'trained_nn')
+                logfile.write('Saved at '+time.ctime()+'\n')
+                logfile.write('Best val Acc: {:4f}'.format(best_acc))
 
         print()
 
@@ -185,7 +188,6 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
     print('Training complete in {:.0f}m {:.0f}s'.format(
         time_elapsed // 60, time_elapsed % 60))
     print('Best val Acc: {:4f}'.format(best_acc))
-    logfile.write('Best val Acc: {:4f}'.format(best_acc))
     logfile.close()
     # load best model weights
     model.load_state_dict(best_model_wts)
@@ -202,7 +204,6 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 model_ft = models.resnet18(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 model_ft.fc = nn.Linear(num_ftrs, 18)
-
 if use_gpu:
     model_ft = model_ft.cuda()
 
@@ -214,6 +215,8 @@ optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
 # Decay LR by a factor of 0.1 every 7 epochs
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
+model_ft.load_state_dict(torch.load('trained_nn'))
+
 ######################################################################
 # Train and evaluate
 # ^^^^^^^^^^^^^^^^^^
@@ -223,9 +226,5 @@ exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 #
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=100
+                       num_epochs=10
                        )
-
-
-
-torch.save(model_ft.state_dict(), 'trained_nn')
