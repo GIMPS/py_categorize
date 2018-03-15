@@ -202,7 +202,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 # Load a pretrained model and reset final fully connected layer.
 #
 
-model_ft = models.resnet34(pretrained=True)
+model_ft = models.resnet152(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 model_ft.fc = nn.Linear(num_ftrs, 18)
 if use_gpu:
@@ -211,10 +211,10 @@ if use_gpu:
 criterion = nn.CrossEntropyLoss()
 
 # Observe that all parameters are being optimized
-optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.01, momentum=0.9)
+optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
 
 # Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=16, gamma=0.1)
+exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=10, gamma=0.5)
 
 #model_ft.load_state_dict(torch.load('trained_nn'))
 
