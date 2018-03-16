@@ -30,7 +30,7 @@ data_dir = 'data'
 image_datasets = {x: MyImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
                   for x in ['test']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
                                              shuffle=True, num_workers=4)
               for x in ['test']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['test']}
@@ -54,7 +54,7 @@ def test_model(model):
             res[int(paths[j].split('_')[1].split('.')[0])]= name_mapping[class_names[preds[j]]]
 
 
-trained_model = models.resnet18(pretrained=True)
+trained_model = models.resnet34(pretrained=True)
 num_ftrs = trained_model.fc.in_features
 trained_model.fc = nn.Linear(num_ftrs, 18)
 trained_model.load_state_dict(torch.load('trained_nn'))
