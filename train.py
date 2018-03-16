@@ -202,7 +202,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 # Load a pretrained model and reset final fully connected layer.
 #
 
-model_ft = models.resnet152(pretrained=True)
+model_ft = models.resnet34(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 model_ft.fc = nn.Linear(num_ftrs, 18)
 if use_gpu:
