@@ -17,3 +17,5 @@ name_mapping={'BabyBibs':0,
 'womenstripedtop' :16,
 'wrapsnslings' :17,
 }
+
+name_mapping_list=['BabyBibs','BabyHat','BabyPants','BabyShirt','PackageFart','womanshirtsleeve','womencasualshoes','womenchiffontop','womendollshoes','womenknittedtop','womenlazyshoes','womenlongsleevetop','womenpeashoes','womenplussizedtop','womenpointedflatshoes','womensleevelesstop','womenstripedtop','wrapsnslings']

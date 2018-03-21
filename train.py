@@ -1,38 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Transfer Learning tutorial
-==========================
-**Author**: `Sasank Chilamkurthy <https://chsasank.github.io>`_
-
-In this tutorial, you will learn how to train your network using
-transfer learning. You can read more about the transfer learning at `cs231n
-notes <http://cs231n.github.io/transfer-learning/>`__
-
-Quoting these notes,
-
-    In practice, very few people train an entire Convolutional Network
-    from scratch (with random initialization), because it is relatively
-    rare to have a dataset of sufficient size. Instead, it is common to
-    pretrain a ConvNet on a very large dataset (e.g. ImageNet, which
-    contains 1.2 million images with 1000 categories), and then use the
-    ConvNet either as an initialization or a fixed feature extractor for
-    the task of interest.
-
-These two major transfer learning scenarios look as follows:
-
--  **Finetuning the convnet**: Instead of random initializaion, we
-   initialize the network with a pretrained network, like the one that is
-   trained on imagenet 1000 dataset. Rest of the training looks as
-   usual.
--  **ConvNet as fixed feature extractor**: Here, we will freeze the weights
-   for all of the network except that of the final fully connected
-   layer. This last fully connected layer is replaced with a new one
-   with random weights and only this layer is trained.
-
-"""
-# License: BSD
-# Author: Sasank Chilamkurthy
-
 from __future__ import print_function, division
 
 import torch
@@ -46,40 +11,18 @@ import os
 import copy
 
 
-######################################################################
 # Load Data
-# ---------
-#
-# We will use torchvision and torch.utils.data packages for loading the
-# data.
-#
-# The problem we're going to solve today is to train a model to classify
-# **ants** and **bees**. We have about 120 training images each for ants and bees.
-# There are 75 validation images for each class. Usually, this is a very
-# small dataset to generalize upon, if trained from scratch. Since we
-# are using transfer learning, we should be able to generalize reasonably
-# well.
-#
-# This dataset is a very small subset of imagenet.
-#
-# .. Note ::
-#    Download the data from
-#    `here <https://download.pytorch.org/tutorial/hymenoptera_data.zip>`_
-#    and extract it to the current directory.
-
-# Data augmentation and normalization for training
-# Just normalization for validation
 data_transforms = {
     'train': transforms.Compose([
-        transforms.RandomResizedCrop(224),
+        transforms.Resize(230),
+        transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
     'val': transforms.Compose([
-        transforms.Resize(256),
+        transforms.Resize(230),
         transforms.CenterCrop(224),
-        transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
 }
@@ -88,7 +31,7 @@ data_dir = 'data'
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
                   for x in ['train', 'val']}
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=8,
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
                                              shuffle=True, num_workers=4)
               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -96,7 +39,7 @@ class_names = image_datasets['train'].classes
 
 use_gpu = torch.cuda.is_available()
 
-logfile = open('log.txt','w')
+
 namefile=open('class_name.py','w')
 namefile.write('class_names=[')
 for name in class_names:
@@ -104,20 +47,9 @@ for name in class_names:
 
 namefile.write(']')
 namefile.close()
-######################################################################
+
 # Training the model
-# ------------------
-#
-# Now, let's write a general function to train a model. Here, we will
-# illustrate:
-#
-# -  Scheduling the learning rate
-# -  Saving the best model
-#
-# In the following, parameter ``scheduler`` is an LR scheduler object from
-# ``torch.optim.lr_scheduler``.
-
-
+all_losses=[]
 def train_model(model, criterion, optimizer, scheduler, num_epochs):
     since = time.time()
 
@@ -169,6 +101,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
                 running_corrects += torch.sum(preds == labels.data)
 
             epoch_loss = running_loss / dataset_sizes[phase]
+            all_losses.append(epoch_loss)
             epoch_acc = running_corrects / dataset_sizes[phase]
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
@@ -179,9 +112,22 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
                 torch.save(model.state_dict(), 'trained_nn')
+
+                logfile = open('log.txt', 'w')
                 logfile.write('Saved at '+time.ctime()+'\n')
                 logfile.write('Best val Acc: {:4f}'.format(best_acc)+'\n')
                 logfile.write('Training Acc: {:4f}'.format(epoch_acc)+'\n')
+                logfile.close()
+
+                f = open('trainLoss.py', 'w')
+                f.write('loss=[')
+                for loss in all_losses:
+                    f.write("[")
+                    for j in range(18):
+                        f.write(str(loss) + ',')
+                    f.write("],")
+                f.write("]")
+                f.close()
 
         print()
 
@@ -189,7 +135,6 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
     print('Training complete in {:.0f}m {:.0f}s'.format(
         time_elapsed // 60, time_elapsed % 60))
     print('Best val Acc: {:4f}'.format(best_acc))
-    logfile.close()
     # load best model weights
     model.load_state_dict(best_model_wts)
     return model
@@ -204,28 +149,22 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 
 model_ft = models.resnet34(pretrained=True)
 num_ftrs = model_ft.fc.in_features
-model_ft.fc = nn.Linear(num_ftrs, 18)
+model_ft.fc = nn.Linear(num_ftrs, len(class_names))
 if use_gpu:
     model_ft = model_ft.cuda()
 
 criterion = nn.CrossEntropyLoss()
 
-# Observe that all parameters are being optimized
 optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
 
-# Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=10, gamma=0.5)
+exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=15, gamma=0.1)
 
 #model_ft.load_state_dict(torch.load('trained_nn'))
 
 ######################################################################
 # Train and evaluate
-# ^^^^^^^^^^^^^^^^^^
-#
-# It should take around 15-25 min on CPU. On GPU though, it takes less than a
-# minute.
-#
+
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=80
+                       num_epochs=40
                        )
