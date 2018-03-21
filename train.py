@@ -123,10 +123,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
                 f = open('trainLoss.py', 'w')
                 f.write('loss=[')
                 for loss in all_losses:
-                    f.write("[")
-                    for j in range(18):
                         f.write(str(loss) + ',')
-                    f.write("],")
                 f.write("]")
                 f.close()
 
@@ -147,8 +144,8 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 #
 # Load a pretrained model and reset final fully connected layer.
 #
-
-model_ft = models.resnet34(pretrained=True)
+import myResnet34 as myres
+model_ft = myres.resnet34(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 model_ft.fc = nn.Linear(num_ftrs, len(class_names))
 if use_gpu:

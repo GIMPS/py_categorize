@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from torchvision import datasets, models, transforms
 import os
 from class_name import class_names
-from mapping import name_mapping
+from mapping import *
 output_csv = open('result.csv','w')
 output_csv.write('id,category\n')
 
@@ -25,7 +25,7 @@ class MyImageFolder(datasets.ImageFolder):
     def __getitem__(self, index):
         return super(MyImageFolder, self).__getitem__(index),self.imgs[index]
 
-data_dir = 'data'
+data_dir = 'data_micro'
 image_datasets = {x: MyImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
                   for x in ['val']}
@@ -40,7 +40,7 @@ res={}
 
 
 # Keep track of correct guesses in a confusion matrix
-confusion = torch.zeros(len(name_mapping), len(name_mapping))
+confusion = torch.zeros(len(name_mapping_list), len(name_mapping_list))
 
 def test_model(model):
     model.eval()
@@ -64,7 +64,7 @@ def test_model(model):
 
 
 
-trained_model = models.resnet34(pretrained=True)
+trained_model = models.resnet18(pretrained=True)
 num_ftrs = trained_model.fc.in_features
 trained_model.fc = nn.Linear(num_ftrs, len(class_names))
 trained_model.load_state_dict(torch.load('trained_nn'))
