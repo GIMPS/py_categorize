@@ -9,20 +9,15 @@ from torchvision import datasets, models, transforms
 import time
 import os
 import copy
-
+from torch.utils.data.dataset import random_split
+import myResnet as myres
 
 # Load Data
 data_transforms = {
-    'train': transforms.Compose([
+    'Training Images': transforms.Compose([
         transforms.Resize(230),
         transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ]),
-    'val': transforms.Compose([
-        transforms.Resize(230),
-        transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
@@ -31,12 +26,19 @@ data_transforms = {
 data_dir = 'data'
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
-                  for x in ['train', 'val']}
+                  for x in ['Training Images']}
+dataset_len = len(image_datasets['Training Images'])
+
+
+class_names = image_datasets['Training Images'].classes
+
+image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Training Images'], [dataset_len // 5,
+                                                                                        dataset_len - dataset_len // 5])
+
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
-                                             shuffle=True, num_workers=4)
-              for x in ['train', 'val']}
+                                              shuffle=True, num_workers=4)
+               for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
-class_names = image_datasets['train'].classes
 
 use_gpu = torch.cuda.is_available()
 
@@ -144,8 +146,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 #
 # Load a pretrained model and reset final fully connected layer.
 #
-import myResnet34 as myres
-model_ft = myres.resnet34(pretrained=True)
+model_ft = myres.resnet18(pretrained=True)
 num_ftrs = model_ft.fc.in_features
 model_ft.fc = nn.Linear(num_ftrs, len(class_names))
 if use_gpu:

@@ -7,12 +7,13 @@ from torchvision import datasets, models, transforms
 import os
 from class_name import class_names
 from mapping import *
+import myResnet as myres
 output_csv = open('result.csv','w')
 output_csv.write('id,category\n')
 
 
 data_transforms = {
-    'val': transforms.Compose([
+    'Training Images': transforms.Compose([
         transforms.Resize(230),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
@@ -25,14 +26,14 @@ class MyImageFolder(datasets.ImageFolder):
     def __getitem__(self, index):
         return super(MyImageFolder, self).__getitem__(index),self.imgs[index]
 
-data_dir = 'data_micro'
+data_dir = 'data'
 image_datasets = {x: MyImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
-                  for x in ['val']}
+                  for x in ['Training Images']}
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
                                              shuffle=True, num_workers=4)
-              for x in ['val']}
-dataset_sizes = {x: len(image_datasets[x]) for x in ['val']}
+              for x in ['Training Images']}
+dataset_sizes = {x: len(image_datasets[x]) for x in ['Training Images']}
 use_gpu = torch.cuda.is_available()
 
 res={}
@@ -45,7 +46,7 @@ confusion = torch.zeros(len(name_mapping_list), len(name_mapping_list))
 def test_model(model):
     model.eval()
     model.train(False)
-    for i, data in enumerate(dataloaders['val']):
+    for i, data in enumerate(dataloaders['Training Images']):
         (inputs, labels), (paths,_)= data
         if use_gpu:
             inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
@@ -63,8 +64,7 @@ def test_model(model):
             confusion[name_mapping[class_names[labels.data[j]]]][name_mapping[class_names[preds[j]]]]+= 1
 
 
-
-trained_model = models.resnet18(pretrained=True)
+trained_model = myres.resnet18(pretrained=True)
 num_ftrs = trained_model.fc.in_features
 trained_model.fc = nn.Linear(num_ftrs, len(class_names))
 trained_model.load_state_dict(torch.load('trained_nn'))

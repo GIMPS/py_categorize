@@ -8,6 +8,8 @@ import os
 import operator
 from class_name import class_names
 from mapping import name_mapping
+import myResnet as myres
+
 output_csv = open('result.csv','w')
 output_csv.write('id,category\n')
 
@@ -38,7 +40,6 @@ use_gpu = torch.cuda.is_available()
 
 res={}
 def test_model(model):
-    model.eval()
     model.train(False)
     for i, data in enumerate(dataloaders['test']):
         (inputs, labels), (paths,_)= data
@@ -53,10 +54,9 @@ def test_model(model):
         for j in range(inputs.size()[0]):
             res[int(paths[j].split('_')[1].split('.')[0])]= name_mapping[class_names[preds[j]]]
 
-
-trained_model = models.resnet18(pretrained=True)
+trained_model = myres.resnet18(pretrained=True)
 num_ftrs = trained_model.fc.in_features
-trained_model.fc = nn.Linear(num_ftrs, 18)
+trained_model.fc = nn.Linear(num_ftrs, len(class_names))
 trained_model.load_state_dict(torch.load('trained_nn'))
 if use_gpu:
     trained_model = trained_model.cuda()
