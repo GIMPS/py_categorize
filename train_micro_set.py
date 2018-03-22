@@ -15,8 +15,9 @@ import myResnet as myres
 # Load Data
 data_transforms = {
     'Training Images': transforms.Compose([
-        transforms.Resize(230),
+        transforms.Resize(235),
         transforms.RandomCrop(224),
+        transforms.ColorJitter(0.1,0.2,0.4),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
