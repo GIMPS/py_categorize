@@ -15,8 +15,9 @@ import myInceptionv4 as myinc
 # Load Data
 data_transforms = {
     'Training Images': transforms.Compose([
-        transforms.Resize(512),
-        transforms.RandomCrop(512),
+        transforms.Resize(320),
+        transforms.RandomCrop(299),
+        #transforms.ColorJitter(0.1,0.1,0.1),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -35,7 +36,7 @@ class_names = image_datasets['Training Images'].classes
 image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Training Images'], [dataset_len // 5,
                                                                                         dataset_len - dataset_len // 5])
 
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
                                               shuffle=True, num_workers=4)
                for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -88,9 +89,11 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 
                 # zero the parameter gradients
                 optimizer.zero_grad()
-
+                if model.training == True:
                 # forward
-                outputs = model(inputs)
+                    outputs,aux_output = model(inputs)
+                else:
+                    outputs = model(inputs)
                 _, preds = torch.max(outputs.data, 1)
                 loss = criterion(outputs, labels)
 
@@ -149,9 +152,9 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 
 
 
-model_ft = myinc.inceptionv4(pretrained=True)
-num_ftrs = model_ft.classif.in_features
-model_ft.classif = nn.Linear(num_ftrs, len(class_names))
+model_ft = models.inception_v3(pretrained=True)
+num_ftrs = model_ft.fc.in_features
+model_ft.fc = nn.Linear(2048, len(class_names))
 if use_gpu:
     model_ft = model_ft.cuda()
 

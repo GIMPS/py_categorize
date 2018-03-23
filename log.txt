@@ -1,3 +1,3 @@
-Saved at Fri Mar 23 13:09:24 2018
-Best val Acc: 0.333333
-Training Acc: 0.333333
+Saved at Fri Mar 23 17:04:23 2018
+Best val Acc: 0.750000
+Training Acc: 0.750000
