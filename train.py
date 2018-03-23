@@ -34,8 +34,8 @@ dataset_len = len(image_datasets['Training Images'])
 
 class_names = image_datasets['Training Images'].classes
 
-image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Training Images'], [dataset_len // 5,
-                                                                                        dataset_len - dataset_len // 5])
+image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Training Images'], [dataset_len // 10,
+                                                                                        dataset_len - dataset_len // 10])
 
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
                                               shuffle=True, num_workers=4)
@@ -156,7 +156,7 @@ if use_gpu:
 
 criterion = nn.CrossEntropyLoss()
 
-optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
+optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9,weight_decay=1e-5)
 
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=15, gamma=0.1)
 
