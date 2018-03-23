@@ -15,9 +15,9 @@ import myResnet as myres
 # Load Data
 data_transforms = {
     'Training Images': transforms.Compose([
-        transforms.Resize(235),
+        transforms.Resize(230),
         transforms.RandomCrop(224),
-        transforms.ColorJitter(0.1,0.2,0.4),
+        transforms.ColorJitter(0.1,0.1,0.1),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -33,8 +33,8 @@ dataset_len = len(image_datasets['Training Images'])
 
 class_names = image_datasets['Training Images'].classes
 
-image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Training Images'], [dataset_len // 5,
-                                                                                        dataset_len - dataset_len // 5])
+image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Training Images'], [dataset_len // 10,
+                                                                                        dataset_len - dataset_len // 10])
 
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
                                               shuffle=True, num_workers=4)

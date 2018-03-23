@@ -12,9 +12,9 @@ plt.ion()   # interactive mode
 
 data_transforms = {
     'Training Images': transforms.Compose([
-        transforms.Resize(235),
+        transforms.Resize(230),
         transforms.RandomCrop(224),
-        transforms.ColorJitter(0.1,0.2,0.4),
+        transforms.ColorJitter(0.1,0.1,0.1),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
