@@ -33,10 +33,10 @@ dataset_len = len(image_datasets['Training Images'])
 
 class_names = image_datasets['Training Images'].classes
 
-image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Training Images'], [dataset_len // 5,
-                                                                                        dataset_len - dataset_len // 5])
+image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Training Images'], [dataset_len // 10,
+                                                                                        dataset_len - dataset_len // 10])
 
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
                                               shuffle=True, num_workers=4)
                for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
