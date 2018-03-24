@@ -15,8 +15,8 @@ import myResnet as myres
 # Load Data
 data_transforms = {
     'Training Images': transforms.Compose([
-        transforms.Resize(320),
-        transforms.RandomCrop(299),
+        transforms.Resize(235),
+        transforms.RandomCrop(224),
         #transforms.ColorJitter(0.1,0.1,0.1),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
@@ -90,11 +90,8 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 
                 # zero the parameter gradients
                 optimizer.zero_grad()
-                if model.training == True:
                 # forward
-                    outputs,aux_output = model(inputs)
-                else:
-                    outputs = model(inputs)
+                outputs = model(inputs)
                 _, preds = torch.max(outputs.data, 1)
                 loss = criterion(outputs, labels)
 
@@ -151,15 +148,15 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 # Load a pretrained model and reset final fully connected layer.
 #
 
-model_ft = models.inception_v3(pretrained=True)
+model_ft = myres.resnet34(pretrained=True)
 num_ftrs = model_ft.fc.in_features
-model_ft.fc = nn.Linear(2048, len(class_names))
+model_ft.fc = nn.Linear(num_ftrs, len(class_names))
 if use_gpu:
     model_ft = model_ft.cuda()
 
 criterion = nn.CrossEntropyLoss()
 
-optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
+optimizer_ft = optim.SGD(model_ft.fc.parameters(), lr=0.001, momentum=0.9)
 
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=15, gamma=0.1)
 
