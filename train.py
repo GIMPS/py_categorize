@@ -9,16 +9,20 @@ from torchvision import datasets, models, transforms
 import time
 import os
 import copy
-from torch.utils.data.dataset import random_split
+from my_subset import random_split
 import myResnet as myres
 
 # Load Data
 data_transforms = {
-    'Training Images': transforms.Compose([
-        transforms.Resize(235),
-        transforms.RandomCrop(224),
-        #transforms.ColorJitter(0.1,0.1,0.1),
+    'train': transforms.Compose([
+        transforms.RandomResizedCrop(299,scale=(0.35,1.0)),
         transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ]),
+    'val': transforms.Compose([
+        transforms.Resize(320),
+        transforms.CenterCrop(299),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
@@ -26,16 +30,17 @@ data_transforms = {
 
 
 data_dir = 'data'
-image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
-                                          data_transforms[x])
+image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x))
                   for x in ['Training Images']}
 dataset_len = len(image_datasets['Training Images'])
 
 
 class_names = image_datasets['Training Images'].classes
 
-image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Training Images'], [dataset_len // 10,
-                                                                                        dataset_len - dataset_len // 10])
+image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Training Images'], [dataset_len // 5,
+                                                                                        dataset_len - dataset_len // 5])
+image_datasets['val'].transform=data_transforms['val']
+image_datasets['train'].transform=data_transforms['train']
 
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
                                               shuffle=True, num_workers=4)
@@ -90,8 +95,13 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 
                 # zero the parameter gradients
                 optimizer.zero_grad()
+
+                if model.training == True:
                 # forward
-                outputs = model(inputs)
+                    outputs,aux_output = model(inputs)
+                else:
+                    outputs = model(inputs)
+
                 _, preds = torch.max(outputs.data, 1)
                 loss = criterion(outputs, labels)
 
@@ -148,15 +158,15 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
 # Load a pretrained model and reset final fully connected layer.
 #
 
-model_ft = myres.resnet34(pretrained=True)
+model_ft = models.inception_v3(pretrained=True)
 num_ftrs = model_ft.fc.in_features
-model_ft.fc = nn.Linear(num_ftrs, len(class_names))
+model_ft.fc = nn.Linear(2048, len(class_names))
 if use_gpu:
     model_ft = model_ft.cuda()
 
 criterion = nn.CrossEntropyLoss()
 
-optimizer_ft = optim.SGD(model_ft.fc.parameters(), lr=0.001, momentum=0.9)
+optimizer_ft = optim.SGD(model_ft.parameters(), lr=0.001, momentum=0.9)
 
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=15, gamma=0.1)
 

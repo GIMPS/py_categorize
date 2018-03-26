@@ -7,23 +7,26 @@ import torchvision
 from torchvision import datasets, models, transforms
 import matplotlib.pyplot as plt
 import os
-from torch.utils.data.dataset import random_split
+from my_subset import random_split
 plt.ion()   # interactive mode
 
 data_transforms = {
-    'Training Images': transforms.Compose([
-        transforms.Resize(320),
-        transforms.RandomCrop(299),
-        #transforms.ColorJitter(0.1,0.1,0.1),
+    'train': transforms.Compose([
+        transforms.RandomResizedCrop(299,scale=(0.35,1.0)),
         transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ]),
+    'val': transforms.Compose([
+        transforms.Resize(320),
+        transforms.CenterCrop(299),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
 }
 
 data_dir = 'data'
-image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
-                                          data_transforms[x])
+image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x))
                   for x in ['Training Images']}
 dataset_len = len(image_datasets['Training Images'])
 
@@ -32,6 +35,8 @@ class_names = image_datasets['Training Images'].classes
 
 image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Training Images'], [dataset_len // 5,
                                                                                         dataset_len - dataset_len // 5])
+image_datasets['val'].transform=data_transforms['val']
+image_datasets['train'].transform=data_transforms['train']
 
 dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=4,
                                               shuffle=True, num_workers=4)
@@ -60,7 +65,7 @@ def imshow(inp, title=None):
 
 
 # Get a batch of training data
-inputs, classes = next(iter(dataloaders['val']))
+inputs, classes = next(iter(dataloaders['train']))
 
 # Make a grid from batch
 out = torchvision.utils.make_grid(inputs)
