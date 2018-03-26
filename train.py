@@ -16,6 +16,7 @@ import myResnet as myres
 data_transforms = {
     'train': transforms.Compose([
         transforms.RandomResizedCrop(299,scale=(0.35,1.0)),
+        transforms.ColorJitter(0.2,0.2,0.2),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -42,7 +43,7 @@ image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Tr
 image_datasets['val'].transform=data_transforms['val']
 image_datasets['train'].transform=data_transforms['train']
 
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=32,
                                               shuffle=True, num_workers=4)
                for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}

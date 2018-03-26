@@ -32,7 +32,7 @@ data_transforms = {
 }
 
 
-data_dir = 'dataMicro'
+data_dir = 'data'
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x))
                   for x in ['Training Images']}
 dataset_len = len(image_datasets['Training Images'])
@@ -45,7 +45,7 @@ image_datasets['val'], image_datasets['train'] = random_split(image_datasets['Tr
 image_datasets['val'].transform=data_transforms['val']
 image_datasets['train'].transform=data_transforms['train']
 
-dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=16,
+dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=32,
                                               shuffle=True, num_workers=4)
                for x in ['train', 'val']}
 dataset_sizes = {x: len(image_datasets[x]) for x in ['train', 'val']}
@@ -166,7 +166,7 @@ criterion = nn.CrossEntropyLoss()
 
 optimizer_ft = optim.SGD(chain(model_ft.fc.parameters(),model_ft.layer4.parameters(),model_ft.layer3.parameters(),model_ft.avgpool.parameters()), lr=0.001, momentum=0.9)
 
-exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
+exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=15, gamma=0.1)
 
 #model_ft.load_state_dict(torch.load('trained_nn'))
 
@@ -175,5 +175,5 @@ exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=25
+                       num_epochs=50
                        )

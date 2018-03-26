@@ -1,1 +1,1 @@
-class_names=['BabyBibs','BabyHat','BabyPants','BabyShirt','PackageFart','womanshirtsleeve','womencasualshoes','womenchiffontop','womendollshoes','womenknittedtop','womenlazyshoes','womenlongsleevetop','womenpeashoes','womenplussizedtop','womenpointedflatshoes','womensleevelesstop','womenstripedtop','wrapsnslings',]
+class_names=['BabyHat','womenlazyshoes','womenlongsleevetop','womensleevelesstop',]
