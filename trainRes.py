@@ -63,13 +63,22 @@ namefile.close()
 
 # Training the model
 all_losses=[]
-best_acc = 0.0
 def train_model(model, criterion, optimizer, scheduler, num_epochs):
     since = time.time()
 
+    best_acc = 0.0
+    epoch = 0
+
+    state = torch.load('trained_state')
+    model_ft.load_state_dict(state['state_dict'])
+    optimizer_ft.load_state_dict(state['optimizer'])
+    epoch = state['epoch']
+    best_acc = state['best_acc']
+
     best_model_wts = copy.deepcopy(model.state_dict())
 
-    for epoch in range(num_epochs):
+    while epoch < num_epochs:
+        epoch+=1
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         print('-' * 10)
 
@@ -124,7 +133,9 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs):
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
+
                 state = {
+                    'epoch': epoch,
                     'state_dict': model.state_dict(),
                     'optimizer': optimizer.state_dict(),
                     'best_acc':best_acc
@@ -173,10 +184,6 @@ optimizer_ft = optim.SGD(chain(model_ft.fc.parameters(),model_ft.layer4.paramete
 
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=15, gamma=0.1)
 
-# state = torch.load('trained_state')
-# model_ft.load_state_dict(state['state_dict'])
-# optimizer_ft.load_state_dict(state['optimizer'])
-# best_acc=state['best_acc']
 
 ######################################################################
 # Train and evaluate
