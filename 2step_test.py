@@ -119,7 +119,7 @@ def test_model_shoes(model):
         for j in range(inputs.size()[0]):
             res[int(paths[j].split('_')[1].split('.')[0])]= name_mapping[class_names_shoes[preds[j]]]
 
-trained_model = myres.resnet18(pretrained=True)
+trained_model = myres.resnet34(pretrained=True)
 num_ftrs = trained_model.fc.in_features
 trained_model.fc = nn.Linear(num_ftrs, len(class_names_general))###############!!
 trained_model.load_state_dict(torch.load('trained_nn_general'))
