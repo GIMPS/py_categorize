@@ -1,0 +1,1 @@
+class_names_clothes=['womenlongsleevetop','womensleevelesstop',]

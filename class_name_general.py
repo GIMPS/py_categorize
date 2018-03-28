@@ -1,0 +1,1 @@
+class_names_general=['BabyHat','clothes','shoes',]

@@ -16,7 +16,7 @@ output_csv.write('id,category\n')
 
 data_transforms = {
     'test': transforms.Compose([
-        transforms.Resize(230),
+        transforms.Resize(235),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -54,10 +54,11 @@ def test_model(model):
         for j in range(inputs.size()[0]):
             res[int(paths[j].split('_')[1].split('.')[0])]= name_mapping[class_names[preds[j]]]
 
-trained_model = myres.resnet18(pretrained=True)
+trained_model = myres.resnet34(pretrained=True)
 num_ftrs = trained_model.fc.in_features
 trained_model.fc = nn.Linear(num_ftrs, len(class_names))
-trained_model.load_state_dict(torch.load('trained_nn'))
+state = torch.load('trained_state')
+trained_model.load_state_dict(state['state_dict'])
 if use_gpu:
     trained_model = trained_model.cuda()
 
